@@ -6,7 +6,7 @@ CONFIG := config.yaml
 
 # Parse config values using grep/sed
 SUFFIX     = $(shell grep '^suffix:' $(CONFIG) | sed 's/suffix: *//')
-FEATURES   = $(shell grep '^features:' $(CONFIG) | sed 's/features: *//')
+FEATURES   = $(shell grep -A100 '^features:' $(CONFIG) | grep '^ *-' | sed 's/^ *- *//' | paste -sd, -)
 WEIGHT_MIN = $(shell grep '^weight_min:' $(CONFIG) | sed 's/weight_min: *//')
 WEIGHT_MAX = $(shell grep '^weight_max:' $(CONFIG) | sed 's/weight_max: *//')
 

@@ -7,7 +7,7 @@ suffix: KG
 # weight_min: 500
 # weight_max: 700
 
-# OpenType features to freeze (comma-separated)
+# OpenType features to freeze
 # for list of features see https://github.com/JetBrains/JetBrainsMono?tab=readme-ov-file#opentype-features
 # Available: calt, cv01-cv20, ss01-ss20
 #   calt  - Ligatures + colon substitution between digits
@@ -16,4 +16,7 @@ suffix: KG
 #   cv10  - Simplified r
 #   cv14  - Dollar sign style
 #   ss19  - Gaps in ligatures
-features: calt,cv10,ss19
+features:
+  - calt
+  - cv10
+  - ss19
