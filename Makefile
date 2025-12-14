@@ -21,16 +21,17 @@ setup:		## Set up Python environment and install dependencies
 
 build:		## Build customized JetBrains Mono fonts
 	@rm -rf fonts
-	@mkdir -p fonts/jb-mono-KG
+	@mkdir -p fonts
 	@for f in font-data/*.ttf; do \
 		basename=$$(basename "$$f" .ttf); \
-		outfile="fonts/jb-mono-KG/$${basename}-KG.ttf"; \
+		outfile="fonts/$${basename}-KG.ttf"; \
 		echo "Processing: $$basename"; \
 		venv/bin/pyftfeatfreeze -f "calt,cv10,ss19" -S -U "KG" "$$f" "$$outfile"; \
 		if [ $$? -eq 0 ]; then \
 			echo "  Created: $$outfile"; \
 			echo "  Pinning weights 500:700..."; \
-			venv/bin/fonttools varLib.instancer "$$outfile" wght=500:700 -o "$$outfile" --overwrite; \
+			venv/bin/fonttools varLib.instancer "$$outfile" wght=500:700 -o "$${outfile%.ttf}.tmp.ttf" && \
+			mv "$${outfile%.ttf}.tmp.ttf" "$$outfile"; \
 		else \
 			echo "  Failed to process: $$basename"; \
 		fi; \
@@ -38,7 +39,7 @@ build:		## Build customized JetBrains Mono fonts
 	@echo "Build complete!"
 
 install: build		## Build and install fonts to Mac
-	@cp fonts/jb-mono-KG/*.ttf ~/Library/Fonts/
+	@cp fonts/*.ttf ~/Library/Fonts/
 	@echo "Fonts installed to ~/Library/Fonts/"
 
 .PHONY: default help setup build install
