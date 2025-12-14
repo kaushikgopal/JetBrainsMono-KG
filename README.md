@@ -10,4 +10,6 @@ font with your preferred alternative characters.
 
 ![jetbrains customization](https://raw.githubusercontent.com/JetBrains/JetBrainsMono/refs/heads/master/images/stylistic-sets%402x.png)
 
+![jetbrains customization 2](https://raw.githubusercontent.com/JetBrains/JetBrainsMono/refs/heads/master/images/character-variants%402x.png)
+
 For example, if you run the `make` command it uses `calt,cv10,ss19` features.
