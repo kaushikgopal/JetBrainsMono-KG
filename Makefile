@@ -1,5 +1,14 @@
 # Default target
-default: build
+default: uninstall build install
+
+# Config file
+CONFIG := config.yaml
+
+# Parse config values using grep/sed
+SUFFIX     = $(shell grep '^suffix:' $(CONFIG) | sed 's/suffix: *//')
+FEATURES   = $(shell grep '^features:' $(CONFIG) | sed 's/features: *//')
+WEIGHT_MIN = $(shell grep '^weight_min:' $(CONFIG) | sed 's/weight_min: *//')
+WEIGHT_MAX = $(shell grep '^weight_max:' $(CONFIG) | sed 's/weight_max: *//')
 
 help:		## List all available commands with descriptions
 	@awk -F'##' '/^[a-zA-Z0-9_-]+:.*##/ {gsub(/:.*/, ":\t\t", $$1); printf "%s%s\n", $$1, $$2}' $(MAKEFILE_LIST) | \
@@ -20,26 +29,38 @@ setup:		## Set up Python environment and install dependencies
 # === Build Targets ===
 
 build:		## Build customized JetBrains Mono fonts
+	@echo "\n\n❌ Removing past builds from project..."
 	@rm -rf fonts
 	@mkdir -p fonts
+	@echo "🛠️ building JetBrainsMono-$(SUFFIX) fonts from Mac..."
 	@for f in font-data/*.ttf; do \
 		basename=$$(basename "$$f" .ttf); \
-		outfile="fonts/$${basename}-KG.ttf"; \
+		outfile="fonts/$${basename}-$(SUFFIX).ttf"; \
 		echo "Processing: $$basename"; \
-		venv/bin/pyftfeatfreeze -f "calt,cv10,ss19" -S -U "KG" "$$f" "$$outfile"; \
+		venv/bin/pyftfeatfreeze -f "$(FEATURES)" -S -U "$(SUFFIX)" "$$f" "$$outfile"; \
 		if [ $$? -eq 0 ]; then \
 			echo "  Created: $$outfile"; \
-			echo "  Pinning weights 500:700..."; \
-			venv/bin/fonttools varLib.instancer "$$outfile" wght=500:700 -o "$${outfile%.ttf}.tmp.ttf" && \
-			mv "$${outfile%.ttf}.tmp.ttf" "$$outfile"; \
+			if [ -n "$(WEIGHT_MIN)" ] && [ -n "$(WEIGHT_MAX)" ]; then \
+				echo "  Pinning weights $(WEIGHT_MIN):$(WEIGHT_MAX)..."; \
+				venv/bin/fonttools varLib.instancer "$$outfile" wght=$(WEIGHT_MIN):$(WEIGHT_MAX) -o "$${outfile%.ttf}.tmp.ttf" && \
+				mv "$${outfile%.ttf}.tmp.ttf" "$$outfile"; \
+			fi; \
 		else \
 			echo "  Failed to process: $$basename"; \
 		fi; \
 	done
-	@echo "Build complete!"
+	@echo "--- 🏁 Build complete! ---"
 
 install: build		## Build and install fonts to Mac
+	@echo "\n\n📦 installing fonts on macOS ..."
 	@cp fonts/*.ttf ~/Library/Fonts/
 	@echo "Fonts installed to ~/Library/Fonts/"
 
-.PHONY: default help setup build install
+uninstall:		## Remove existing font variations from Mac and project
+	@echo "❌ Removing existing JetBrainsMono-$(SUFFIX) fonts from Mac..."
+	@rm -f ~/Library/Fonts/*-$(SUFFIX).ttf 2>/dev/null || true
+	@echo "❌ Removing existing fonts from project..."
+	@rm -rf fonts 2>/dev/null || true
+	@echo "-- Uninstall complete! --"
+
+.PHONY: default help setup build install uninstall
